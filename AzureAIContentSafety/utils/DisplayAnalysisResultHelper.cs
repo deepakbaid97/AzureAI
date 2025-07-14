@@ -128,6 +128,66 @@ public static class DisplayAnalysisResultHelper
     }
 
     /// <summary>
+    /// Displays the results from the Protected Material Detection API analysis.
+    /// </summary>
+    /// <param name="result">The JSON response from the API</param>
+    /// <param name="contentType">The type of content analyzed (text or code)</param>
+    public static void DisplayProtectedMaterialResults(JsonDocument result, string contentType)
+    {
+        try
+        {
+            Console.WriteLine($"\n=== PROTECTED {contentType.ToUpper()} MATERIAL DETECTION RESULTS ===");
+
+            var root = result.RootElement;
+
+            // Display protected material detection status
+            if (root.TryGetProperty("protectedMaterialAnalysis", out var protectedMaterialAnalysis))
+            {
+                if (protectedMaterialAnalysis.TryGetProperty("detected", out var detected))
+                {
+                    var isDetected = detected.GetBoolean();
+                    Console.WriteLine($"Protected Material Detected: {(isDetected ? "YES" : "NO")}");
+                    
+                    if (isDetected)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"⚠️  PROTECTED/COPYRIGHTED {contentType.ToUpper()} CONTENT DETECTED!");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"✅ No protected material detected in the provided {contentType}.");
+                        Console.ResetColor();
+                    }
+                }
+            }
+
+            // Display confidence score if available
+            if (root.TryGetProperty("confidence", out var confidence))
+            {
+                Console.WriteLine($"Confidence Score: {confidence.GetDecimal():F2}");
+            }
+
+            // Display raw JSON for detailed analysis (optional)
+            Console.WriteLine("\n--- Raw API Response ---");
+            Console.WriteLine(JsonSerializer.Serialize(result.RootElement, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error displaying protected material detection results: {ex.Message}");
+            Console.WriteLine("Raw response:");
+            Console.WriteLine(JsonSerializer.Serialize(result.RootElement, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
+    }
+
+    /// <summary>
     /// Provides human-readable severity descriptions.
     /// </summary>
     /// <param name="severity">Severity level (0-7)</param>
