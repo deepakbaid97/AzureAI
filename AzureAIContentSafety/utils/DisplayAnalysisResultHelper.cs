@@ -1,6 +1,7 @@
 using Azure.AI.ContentSafety;
 using System;
 using System.Linq;
+using System.Text.Json;
 
 namespace Azure.AI.ContentSafety.Utils;
 
@@ -66,6 +67,64 @@ public static class DisplayAnalysisResultHelper
 
         Console.WriteLine(new string('=', 40));
         Console.WriteLine("Severity Scale: 0 (Safe) - 7 (High Risk)");
+    }
+
+    /// <summary>
+    /// Displays the results from the Shield Prompt API analysis.
+    /// </summary>
+    /// <param name="result">The JSON response from the API</param>
+    public static void DisplayShieldPromptResults(JsonDocument result)
+    {
+        try
+        {
+            Console.WriteLine("\n=== SHIELD PROMPT ANALYSIS RESULTS ===");
+
+            var root = result.RootElement;
+
+            // Display overall attack detected status
+            if (root.TryGetProperty("userPromptAnalysis", out var userPromptAnalysis))
+            {
+                if (userPromptAnalysis.TryGetProperty("attackDetected", out var attackDetected))
+                {
+                    var isAttackDetected = attackDetected.GetBoolean();
+                    Console.WriteLine($"Attack Detected: {(isAttackDetected ? "YES" : "NO")}");                    
+                }
+            }
+
+            // Display document analysis results if available
+            if (root.TryGetProperty("documentsAnalysis", out var documentsAnalysis) && 
+                documentsAnalysis.ValueKind == JsonValueKind.Array)
+            {
+                Console.WriteLine("\n--- Dclsocument Analysis ---");
+                for (int i = 0; i < documentsAnalysis.GetArrayLength(); i++)
+                {
+                    var doc = documentsAnalysis[i];
+                    Console.WriteLine($"Document {i + 1}:");
+                    
+                    if (doc.TryGetProperty("attackDetected", out var docAttackDetected))
+                    {
+                        var isDocAttackDetected = docAttackDetected.GetBoolean();
+                        Console.WriteLine($"  Attack Detected: {(isDocAttackDetected ? "YES" : "NO")}");
+                    }
+                }
+            }
+
+            // Display raw JSON for detailed analysis (optional)
+            Console.WriteLine("\n--- Raw API Response ---");
+            Console.WriteLine(JsonSerializer.Serialize(result.RootElement, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error displaying Shield Prompt results: {ex.Message}");
+            Console.WriteLine("Raw response:");
+            Console.WriteLine(JsonSerializer.Serialize(result.RootElement, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
     }
 
     /// <summary>
