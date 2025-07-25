@@ -10,7 +10,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToSpeech", "AzureAISpee
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextTranslation", "TextTranslation", "{93EBDD60-B50C-4603-9AC9-1EA8C673D90D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "text-translation-sdk", "text-translation-sdk\text-translation-sdk.csproj", "{6CAD1E13-4016-43B0-B7AC-89A87BC47558}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "text-translation-sdk", "AzureAILanguage\text-translation-sdk\text-translation-sdk.csproj", "{D0E9AA8F-4BF3-48D4-8377-700449EA40FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentTranslation", "DocumentTranslation", "{4089C64C-CD28-47E6-B39F-ACBC40B715AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "document-translation-sync-sdk", "document-translation\document-translation-sync-sdk.csproj", "{1B43FAE1-E879-4258-B851-6F5C88D12626}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,17 +30,22 @@ Global
 		{66F40128-C4B5-4CBF-8F76-54FCFC9141E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66F40128-C4B5-4CBF-8F76-54FCFC9141E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66F40128-C4B5-4CBF-8F76-54FCFC9141E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CAD1E13-4016-43B0-B7AC-89A87BC47558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CAD1E13-4016-43B0-B7AC-89A87BC47558}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CAD1E13-4016-43B0-B7AC-89A87BC47558}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CAD1E13-4016-43B0-B7AC-89A87BC47558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0E9AA8F-4BF3-48D4-8377-700449EA40FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0E9AA8F-4BF3-48D4-8377-700449EA40FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E9AA8F-4BF3-48D4-8377-700449EA40FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0E9AA8F-4BF3-48D4-8377-700449EA40FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B43FAE1-E879-4258-B851-6F5C88D12626}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B43FAE1-E879-4258-B851-6F5C88D12626}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B43FAE1-E879-4258-B851-6F5C88D12626}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B43FAE1-E879-4258-B851-6F5C88D12626}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{66F40128-C4B5-4CBF-8F76-54FCFC9141E8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{6CAD1E13-4016-43B0-B7AC-89A87BC47558} = {93EBDD60-B50C-4603-9AC9-1EA8C673D90D}
+		{D0E9AA8F-4BF3-48D4-8377-700449EA40FA} = {93EBDD60-B50C-4603-9AC9-1EA8C673D90D}
+		{1B43FAE1-E879-4258-B851-6F5C88D12626} = {4089C64C-CD28-47E6-B39F-ACBC40B715AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B6675AF8-24A3-4F68-93E1-A0E063DB452D}
