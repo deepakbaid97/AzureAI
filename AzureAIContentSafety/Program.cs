@@ -59,6 +59,10 @@ public class Program
                     await HandleListBlocklistItems(args, configuration);
                     break;
 
+                case "analyzewithblocklist":
+                    await HandleAnalyzeWithBlocklist(args, configuration);
+                    break;
+
                 default:
                     Console.WriteLine($"Invalid mode: {mode}");
                     DisplayUsage();
@@ -273,6 +277,45 @@ public class Program
     }
 
     /// <summary>
+    /// Handles text analysis using a blocklist
+    /// </summary>
+    /// <param name="args">Command line arguments</param>
+    /// <param name="configuration">Application configuration</param>
+    private static async Task HandleAnalyzeWithBlocklist(string[] args, IConfiguration configuration)
+    {
+        string blocklistName = "ProhibitStockAnalysis"; // Default blocklist name
+        string textToAnalyze;
+        bool haltOnBlocklistHit = true;
+
+        // Parse arguments: analyzewithblocklist [blocklist_name] [text_to_analyze] [halt_on_hit]
+        if (args.Length > 1)
+        {
+            blocklistName = args[1];
+        }
+
+        if (args.Length > 2)
+        {
+            textToAnalyze = string.Join(" ", args.Skip(2));
+        }
+        else
+        {
+            // Default text containing some of the stock analysis terms
+            textToAnalyze = "I need help with Stock Market Analysis and understanding Investment Strategy fundamentals for my portfolio.";
+            Console.WriteLine("No text provided, using default sample text with potential blocklist matches.");
+        }
+
+        // Optional: parse halt on hit parameter
+        if (args.Length > 3 && bool.TryParse(args[3], out bool halt))
+        {
+            haltOnBlocklistHit = halt;
+        }
+
+        var client = CreateContentSafetyClient(configuration);
+        // Perform blocklist analysis
+        await BlocklistManager.AnalyzeTextWithBlocklistAsync(client, blocklistName, textToAnalyze, haltOnBlocklistHit);
+    }
+
+    /// <summary>
     /// Creates a ContentSafetyClient with appropriate authentication
     /// </summary>
     /// <param name="configuration">Application configuration</param>
@@ -320,6 +363,7 @@ public class Program
         Console.WriteLine("  ContentSafetySamples.exe protectedcode [code_to_analyze]");
         Console.WriteLine("  ContentSafetySamples.exe createblocklist [blocklist_name] [blocklist_description] [items]");
         Console.WriteLine("  ContentSafetySamples.exe blocklistitems [blocklist_name]");
+        Console.WriteLine("  ContentSafetySamples.exe analyzewithblocklist [blocklist_name] [text_to_analyze] [halt_on_hit]");
         Console.WriteLine();
         Console.WriteLine("Modes:");
         Console.WriteLine("  text  - Analyze text content for safety");
@@ -330,6 +374,7 @@ public class Program
         Console.WriteLine("  protectedcode - Analyze code for protected material detection");
         Console.WriteLine("  createblocklist - Create/manage blocklists and analyze text against them");
         Console.WriteLine("  blocklistitems - List items from existing blocklist");
+        Console.WriteLine("  analyzewithblocklist - Analyze text using a specific blocklist");
         Console.WriteLine();
         Console.WriteLine("Examples:");
         Console.WriteLine("  ContentSafetySamples.exe text \"This is sample text to analyze\"");
@@ -340,6 +385,7 @@ public class Program
         Console.WriteLine("  ContentSafetySamples.exe protectedcode \"print('Hello, world!')\"");
         Console.WriteLine("  ContentSafetySamples.exe createblocklist MyBlocklist \"Contains prohibited terms\" \"term1;term2;term3\"");
         Console.WriteLine("  ContentSafetySamples.exe blocklistitems MyBlocklist");
+        Console.WriteLine("  ContentSafetySamples.exe analyzewithblocklist MyBlocklist \"Text with blocked terms\" true");
         Console.WriteLine();
         Console.WriteLine("Blocklist Usage:");
         Console.WriteLine("  createblocklist [name] [description] [items] - Creates a blocklist and adds items");
@@ -348,6 +394,10 @@ public class Program
         Console.WriteLine("    - items: Optional semicolon-separated list of blocked terms");
         Console.WriteLine("  blocklistitems [name] - Shows items from existing blocklist");
         Console.WriteLine("    - name: Optional blocklist name (default: ProhibitStockAnalysis)");
+        Console.WriteLine("  analyzewithblocklist [name] [text] [halt] - Analyze text using blocklist");
+        Console.WriteLine("    - name: Optional blocklist name (default: ProhibitStockAnalysis)");
+        Console.WriteLine("    - text: Text to analyze (default: sample text with potential matches)");
+        Console.WriteLine("    - halt: Optional boolean to halt on blocklist hit (default: true)");
         Console.WriteLine();
         Console.WriteLine("Note: If no text is provided with 'text' or 'both' modes,");
         Console.WriteLine("      a default sample text will be used for demonstration.");

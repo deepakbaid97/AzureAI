@@ -137,6 +137,84 @@ public static class BlocklistManager
         }
     }
 
+    /// <summary>
+    /// Analyzes text content using a specified blocklist for custom term detection.
+    /// </summary>
+    /// <param name="configuration">Application configuration containing endpoint and API key</param>
+    /// <param name="blocklistName">Name of the blocklist to use for analysis</param>
+    /// <param name="textToAnalyze">Text content to analyze</param>
+    /// <param name="haltOnBlocklistHit">Whether to halt analysis on first blocklist match</param>
+    public static async Task AnalyzeTextWithBlocklistAsync(
+        ContentSafetyClient client,
+        string blocklistName,
+        string textToAnalyze,
+        bool haltOnBlocklistHit = true)
+    {
+        try
+        {
+            Console.WriteLine("=== TEXT ANALYSIS WITH BLOCKLIST ===");
+            Console.WriteLine(new string('-', 50));
+            Console.WriteLine($"Blocklist: {blocklistName}");
+            Console.WriteLine($"Halt on hit: {haltOnBlocklistHit}");
+            Console.WriteLine($"Text to analyze: {textToAnalyze}");
+            Console.WriteLine();
+
+            // Set up the analysis request with blocklist
+            var request = new AnalyzeTextOptions(textToAnalyze);
+            request.BlocklistNames.Add(blocklistName);
+            request.HaltOnBlocklistHit = haltOnBlocklistHit;
+
+            // Perform the analysis
+            Response<AnalyzeTextResult> response;
+            try
+            {
+                response = await client.AnalyzeTextAsync(request);
+            }
+            catch (RequestFailedException ex)
+            {
+                Console.WriteLine("Analyze text failed.\nStatus code: {0}, Error code: {1}, Error message: {2}", ex.Status, ex.ErrorCode, ex.Message);
+                throw;
+            }
+
+            // Display blocklist match results
+            if (response.Value.BlocklistsMatch != null && response.Value.BlocklistsMatch.Any())
+            {
+                Console.WriteLine("🚫 BLOCKLIST MATCHES FOUND:");
+                Console.WriteLine(new string('-', 30));
+                foreach (var matchResult in response.Value.BlocklistsMatch)
+                {
+                    Console.WriteLine($"- Blocklist: {matchResult.BlocklistName}");
+                    Console.WriteLine($"  Item ID: {matchResult.BlocklistItemId}");
+                    Console.WriteLine($"  Matched Text: {matchResult.BlocklistItemText}");
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("✅ No blocklist matches found.");
+            }
+
+            // Display standard content safety results if available
+            if (response.Value.CategoriesAnalysis != null && response.Value.CategoriesAnalysis.Any())
+            {
+                Console.WriteLine("\nSTANDARD CONTENT SAFETY ANALYSIS:");
+                Console.WriteLine(new string('-', 35));
+                foreach (var result in response.Value.CategoriesAnalysis)
+                {
+                    Console.WriteLine($"- {result.Category}: Severity {result.Severity}");
+                }
+            }
+
+            Console.WriteLine($"\nAnalysis completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ An error occurred during text analysis with blocklist: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
+    }
+
     private static BlocklistClient CreateBlocklistClient(IConfiguration configuration)
     {
         // Get endpoint and API key from configuration
