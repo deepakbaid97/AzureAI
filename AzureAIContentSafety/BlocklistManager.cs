@@ -1,4 +1,4 @@
-using Azure.AI.ContentSafety.Utils;
+using Azure.AI.ContentSafety.Samples.utils;
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
 
@@ -11,19 +11,17 @@ namespace Azure.AI.ContentSafety.Samples;
 /// </summary>
 public static class BlocklistManager
 {
-    /// <summary>
-    /// Demonstrates blocklist concepts and shows how text analysis would work with blocklists.
-    /// In a real implementation, this would create actual blocklists via REST API.
-    /// </summary>
-    /// <param name="configuration">Application configuration containing endpoint and API key</param>
-    /// <param name="blocklistName">Name for the custom blocklist</param>
-    /// <param name="textToAnalyze">Text to analyze</param>
-    /// <param name="blocklistItems">Array of items that would be in the blocklist</param>
-    public static async Task CreateBlocklistAndAddItemsAsync(
-        IConfiguration configuration,
-        string blocklistName,
-        string blocklistDescription,
-        List<string> blocklistItems)
+    private const string BlocklistName = "ProhibitStockAnalysis";
+    private const string BlocklistDescription = "Contains terms related to stock analysis.";
+    private static readonly string[] BlocklistItems = [
+            "Stock",
+            "Fundamentals",
+            "Market Analysis",
+            "Investment Strategy",
+        ];
+    private const string TextToAnalyze = "The stock market is volatile, and understanding fundamentals is key to investment strategy.";
+
+    public static async Task CreateBlocklistAndAddItemsAsync(IConfiguration configuration)
     {
         try
         {
@@ -34,19 +32,19 @@ public static class BlocklistManager
 
             var data = new
             {
-                description = blocklistDescription,
+                description = BlocklistDescription,
             };
 
             // create blocklist
-            var createResponse = await blocklistClient.CreateOrUpdateTextBlocklistAsync(blocklistName, RequestContent.Create(data));
+            var createResponse = await blocklistClient.CreateOrUpdateTextBlocklistAsync(BlocklistName, RequestContent.Create(data));
 
             if (createResponse.Status == 201)
             {
-                Console.WriteLine("\nBlocklist {0} created.", blocklistName);
+                Console.WriteLine("\nBlocklist {0} created.", BlocklistName);
             }
 
-            var items = blocklistItems.Select(x => new TextBlocklistItem(x)).ToArray();
-            var addedBlocklistItems = blocklistClient.AddOrUpdateBlocklistItems(blocklistName, new AddOrUpdateTextBlocklistItemsOptions(items));
+            var items = BlocklistItems.Select(x => new TextBlocklistItem(x)).ToArray();
+            var addedBlocklistItems = blocklistClient.AddOrUpdateBlocklistItems(BlocklistName, new AddOrUpdateTextBlocklistItemsOptions(items));
 
             if (addedBlocklistItems != null && addedBlocklistItems.Value != null)
             {
@@ -105,16 +103,14 @@ public static class BlocklistManager
         }
     }
 
-    public static async Task ListBlocklistItemsAsync(
-        IConfiguration configuration,
-        string blocklistName)
+    public static async Task ListBlocklistItemsAsync(IConfiguration configuration)
     {
         try
         {
             var blocklistClient = CreateBlocklistClient(configuration);
 
             // List items in the blocklist
-            var blocklistItems = blocklistClient.GetTextBlocklistItemsAsync(blocklistName);
+            var blocklistItems = blocklistClient.GetTextBlocklistItemsAsync(BlocklistName);
 
             Console.WriteLine("\nBlocklist Items:");
             bool hasItems = false;
@@ -137,44 +133,20 @@ public static class BlocklistManager
         }
     }
 
-    /// <summary>
-    /// Analyzes text content using a specified blocklist for custom term detection.
-    /// </summary>
-    /// <param name="configuration">Application configuration containing endpoint and API key</param>
-    /// <param name="blocklistName">Name of the blocklist to use for analysis</param>
-    /// <param name="textToAnalyze">Text content to analyze</param>
-    /// <param name="haltOnBlocklistHit">Whether to halt analysis on first blocklist match</param>
-    public static async Task AnalyzeTextWithBlocklistAsync(
-        ContentSafetyClient client,
-        string blocklistName,
-        string textToAnalyze,
-        bool haltOnBlocklistHit = true)
+    public static async Task AnalyzeTextWithBlocklistAsync(IConfiguration configuration)
     {
+        var client = ContentSafetyClientFactory.CreateContentSafetyClient(configuration);
         try
         {
             Console.WriteLine("=== TEXT ANALYSIS WITH BLOCKLIST ===");
             Console.WriteLine(new string('-', 50));
-            Console.WriteLine($"Blocklist: {blocklistName}");
-            Console.WriteLine($"Halt on hit: {haltOnBlocklistHit}");
-            Console.WriteLine($"Text to analyze: {textToAnalyze}");
-            Console.WriteLine();
 
             // Set up the analysis request with blocklist
-            var request = new AnalyzeTextOptions(textToAnalyze);
-            request.BlocklistNames.Add(blocklistName);
-            request.HaltOnBlocklistHit = haltOnBlocklistHit;
+            var request = new AnalyzeTextOptions(TextToAnalyze);
+            request.BlocklistNames.Add(BlocklistName);
+            request.HaltOnBlocklistHit = true; //Whether to halt analysis on first blocklist match
 
-            // Perform the analysis
-            Response<AnalyzeTextResult> response;
-            try
-            {
-                response = await client.AnalyzeTextAsync(request);
-            }
-            catch (RequestFailedException ex)
-            {
-                Console.WriteLine("Analyze text failed.\nStatus code: {0}, Error code: {1}, Error message: {2}", ex.Status, ex.ErrorCode, ex.Message);
-                throw;
-            }
+            var response = await client.AnalyzeTextAsync(request);
 
             // Display blocklist match results
             if (response.Value.BlocklistsMatch != null && response.Value.BlocklistsMatch.Any())

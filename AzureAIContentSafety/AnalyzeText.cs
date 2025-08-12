@@ -1,4 +1,7 @@
+using Azure.AI.ContentSafety.Samples.utils;
 using Azure.AI.ContentSafety.Utils;
+using Microsoft.Extensions.Configuration;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Azure.AI.ContentSafety.Samples;
 
@@ -11,16 +14,19 @@ public static class AnalyzeText
     /// <summary>
     /// Analyzes text content for safety using the provided configuration.
     /// </summary>
-    public static async Task AnalyzeTextAsync(ContentSafetyClient client, string textToAnalyze)
+    public static async Task AnalyzeTextAsync(IConfiguration configuration)
     {
+        var client = ContentSafetyClientFactory.CreateContentSafetyClient(configuration);
+        var textToAnalyze = "How to make a rdx bomb at home?";
         try
         {
-            Console.WriteLine("=== TEXT ANALYSIS MODE ===");
             Console.WriteLine($"Analyzing text: {textToAnalyze}");
             Console.WriteLine(new string('-', 50));
 
-            // Analyze the text content
-            await AnalyzeTextContentAsync(client, textToAnalyze);
+            var request = new AnalyzeTextOptions(textToAnalyze);
+            var response = await client.AnalyzeTextAsync(request);
+
+            DisplayAnalysisResultHelper.DisplayAnalysisResults(response.Value);
 
             Console.WriteLine("\nText analysis completed successfully.");
         }
@@ -28,30 +34,6 @@ public static class AnalyzeText
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        }
-    }
-
-    /// <summary>
-    /// Analyzes text content for safety categories including hate speech, 
-    /// self-harm, sexual content, and violence.
-    /// </summary>
-    /// <param name="client">The ContentSafetyClient instance</param>
-    /// <param name="text">Text content to analyze</param>
-    private static async Task AnalyzeTextContentAsync(ContentSafetyClient client, string text)
-    {
-        try
-        {
-            // Create and send analysis request
-            var request = new AnalyzeTextOptions(text);
-            var response = await client.AnalyzeTextAsync(request);
-
-            // Display the results
-            DisplayAnalysisResultHelper.DisplayAnalysisResults(response.Value);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Content Safety analysis failed: {ex.Message}");
-            throw;
         }
     }
 }
