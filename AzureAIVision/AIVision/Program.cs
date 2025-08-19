@@ -28,14 +28,9 @@ public class Program
         // Create an Image Analysis client.
         ImageAnalysisClient client = new ImageAnalysisClient(new Uri(endpoint), new AzureKeyCredential(key));
 
-        ImageAnalysisResult result = client.Analyze(
-            BinaryData.FromBytes(File.ReadAllBytes(dataPath)),
-            VisualFeatures.Caption,
-            new ImageAnalysisOptions { GenderNeutralCaption = true });
+        ImageAnalysis analysis = new ImageAnalysis(client);
 
-        Console.WriteLine($"Image analysis results:");
-        Console.WriteLine($" Metadata: Model: {result.ModelVersion} Image dimensions: {result.Metadata.Width} x {result.Metadata.Height}");
-        Console.WriteLine($" Caption:");
-        Console.WriteLine($"   '{result.Caption.Text}', Confidence {result.Caption.Confidence:F4}");
+        analysis.Anayse(VisualFeatures.Caption | VisualFeatures.Read, dataPath);
+
     }
 }
