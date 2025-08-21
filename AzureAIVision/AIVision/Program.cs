@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using AIVision.Image_Analysis;
+using Azure;
 using Azure.AI.Vision.ImageAnalysis;
 using System;
 using System.IO;
