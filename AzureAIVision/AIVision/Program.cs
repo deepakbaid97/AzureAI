@@ -23,7 +23,7 @@ public class Program
             return;
         }
 
-        // RunImageAnalysis(assemblyDirectory);
+        RunImageAnalysis(assemblyDirectory);
 
         RunFaceAnalysis(assemblyDirectory);
     }
@@ -40,7 +40,9 @@ public class Program
 
         ImageAnalysis analysis = new ImageAnalysis(client);
 
-        analysis.Anayse(VisualFeatures.Caption | VisualFeatures.Read, dataPath);
+        analysis.Analyse(VisualFeatures.Caption | VisualFeatures.Read, dataPath);
+
+        analysis.Analyse(VisualFeatures.SmartCrops, dataPath, new ImageAnalysisOptions { SmartCropsAspectRatios = new float[] { 0.9F, 1.33F } });
     }
 
     private static void RunFaceAnalysis(String assemblyDirectory)
