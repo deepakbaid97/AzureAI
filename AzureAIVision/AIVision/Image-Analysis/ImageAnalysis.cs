@@ -4,7 +4,7 @@ namespace AIVision.Image_Analysis;
 
 public class ImageAnalysis(ImageAnalysisClient client)
 {
-    public void Anayse(VisualFeatures visualFeatures, String dataPath)
+    public void Analyse(VisualFeatures visualFeatures, String dataPath)
     {
         if (visualFeatures == VisualFeatures.None)
         {
@@ -13,9 +13,33 @@ public class ImageAnalysis(ImageAnalysisClient client)
         // Perform the image analysis using the provided client and options.
         ImageAnalysisResult result = client.Analyze(
             BinaryData.FromBytes(File.ReadAllBytes(dataPath)),
-            visualFeatures,
-            new ImageAnalysisOptions { GenderNeutralCaption = true });
+            visualFeatures);
 
+        if (result != null)
+        {
+            AnalyseResults(result);
+        }
+    }
+
+    public void Analyse(VisualFeatures visualFeatures, String dataPath, ImageAnalysisOptions options)
+    {
+        if (visualFeatures == VisualFeatures.None)
+        {
+            throw new ArgumentException("At least one visual feature must be specified.", nameof(visualFeatures));
+        }
+        // Perform the image analysis using the provided client and options.
+        ImageAnalysisResult result = client.Analyze(
+            BinaryData.FromBytes(File.ReadAllBytes(dataPath)),
+            visualFeatures, options);
+
+        if (result != null)
+        {
+            AnalyseResults(result);
+        }
+    }
+
+    private void AnalyseResults (ImageAnalysisResult result)
+    {
         // Check properties dynamically and invoke appropriate methods
         if (result.Caption != null)
         {
