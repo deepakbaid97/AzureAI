@@ -1,17 +1,6 @@
-﻿using Azure;
-using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
+﻿using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Training;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Training.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIVision.CustomVision;
 

@@ -19,6 +19,7 @@ public class FaceAnalysis(FaceClient client)
             faceIdTimeToLive: 120);
 
         var detectedFaces = detectResponse.Value;
+        // By default, there are 27 predefined landmark points. 
         Console.WriteLine($"Detected {detectedFaces.Count} face(s) in the image.");
         foreach (var detectedFace in detectedFaces)
         {
