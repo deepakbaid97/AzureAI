@@ -1,5 +1,7 @@
-﻿using AIVision.Image_Analysis;
+﻿using AIVision.Face;
+using AIVision.Image_Analysis;
 using Azure;
+using Azure.AI.Vision.Face;
 using Azure.AI.Vision.ImageAnalysis;
 using System;
 using System.IO;
@@ -21,7 +23,14 @@ public class Program
             return;
         }
 
-        var dataPath = Path.Combine(assemblyDirectory, "..", "..", "..", "testing-image.png");
+        // RunImageAnalysis(assemblyDirectory);
+
+        RunFaceAnalysis(assemblyDirectory);
+    }
+
+    private static void RunImageAnalysis(String assemblyDirectory)
+    {
+        var dataPath = Path.Combine(assemblyDirectory, "..", "..", "..", "Images", "testing-image.png");
 
         string endpoint = Environment.GetEnvironmentVariable("VISION_ENDPOINT");
         string key = Environment.GetEnvironmentVariable("VISION_KEY");
@@ -32,6 +41,20 @@ public class Program
         ImageAnalysis analysis = new ImageAnalysis(client);
 
         analysis.Anayse(VisualFeatures.Caption | VisualFeatures.Read, dataPath);
-
     }
+
+    private static void RunFaceAnalysis(String assemblyDirectory)
+    {
+        var dataPath = Path.Combine(assemblyDirectory, "..", "..", "..", "Images", "people.jpg");
+
+        string endpoint = Environment.GetEnvironmentVariable("VISION_ENDPOINT");
+        string key = Environment.GetEnvironmentVariable("VISION_KEY");
+
+        FaceClient client = new FaceClient(new Uri(endpoint), new AzureKeyCredential(key));
+
+        FaceAnalysis analysis = new FaceAnalysis(client);
+
+        analysis.Analyse(dataPath);
+    }
+
 }
