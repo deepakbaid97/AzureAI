@@ -1,7 +1,7 @@
-using System.Text;
-using System.Text.Json;
 using Azure.AI.ContentSafety.Utils;
 using Microsoft.Extensions.Configuration;
+using System.Text;
+using System.Text.Json;
 
 namespace Azure.AI.ContentSafety.Samples;
 
@@ -14,32 +14,41 @@ public static class ProtectedMaterialDetection
     private static readonly HttpClient _httpClient = new();
     private const string UrlForProtectedMaterialText = "/contentsafety/text:detectProtectedMaterial?api-version=2024-09-01";
     private const string UrlForProtectedMaterialCode = "/contentsafety/text:detectProtectedMaterialForCode?api-version=2024-09-15-preview";
+    // Default text for demonstration (from the API documentation - song lyrics)
+    private const string TextToAnalyze = "Kiss me out of the bearded barley Nightly beside the green, green grass Swing, swing, swing the spinning step You wear those shoes and I will wear that dress Oh, kiss me beneath the milky twilight Lead me out on the moonlit floor Lift your open hand Strike up the band and make the fireflies dance Silver moon's sparkling So, kiss me Kiss me down by the broken tree house Swing me upon its hanging tire Bring, bring, bring your flowered hat We'll take the trail marked on your father's map.";
 
-    /// <summary>
-    /// Analyzes text content to detect protected material such as copyrighted songs, books, or articles.
-    /// </summary>
-    /// <param name="configuration">Configuration containing endpoint and API key</param>
-    /// <param name="textToAnalyze">The text content to analyze for protected material</param>
-    public static async Task AnalyzeProtectedTextAsync(IConfiguration configuration, string textToAnalyze)
+    // Default code for demonstration (from the API documentation - Python game code)
+    private const string CodeToAnalyze = "python import pygame pygame.init() win = pygame.display.set_mode((500, 500)) pygame.display.set_caption(My Game) x = 50 y = 50 width = 40 height = 60 vel = 5 run = True while run: pygame.time.delay(100) for event in pygame.event.get(): if event.type == pygame.QUIT: run = False keys = pygame.key.get_pressed() if keys[pygame.K_LEFT] and x > vel: x -= vel if keys[pygame.K_RIGHT] and x < 500 - width - vel: x += vel if keys[pygame.K_UP] and y > vel: y -= vel if keys[pygame.K_DOWN] and y < 500 - height - vel: y += vel win.fill((0, 0, 0)) pygame.draw.rect(win, (255, 0, 0), (x, y, width, height)) pygame.display.update() pygame.quit()";
+
+
+    public static async Task AnalyzeProtectedTextAsync(IConfiguration configuration)
     {
+        // Get endpoint and API key from configuration
+        var endpoint = configuration["ContentSafety:Endpoint"];
+        var apiKey = configuration["ContentSafety:ApiKey"];
+
+        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException("ContentSafety endpoint and API key must be configured in appsettings.json");
+        }
+
         try
         {
             Console.WriteLine("=== PROTECTED TEXT MATERIAL DETECTION MODE ===");
             Console.WriteLine($"Analyzing text for protected/copyrighted content...");
-            Console.WriteLine($"Text to analyze: {textToAnalyze[..Math.Min(150, textToAnalyze.Length)]}...");
             Console.WriteLine(new string('-', 50));
 
-            // Get endpoint and API key from configuration
-            var endpoint = configuration["ContentSafety:Endpoint"];
-            var apiKey = configuration["ContentSafety:ApiKey"];
+            // Construct the API URL for text
+            var baseUrl = endpoint.TrimEnd('/');
+            var apiUrl = $"{baseUrl}{UrlForProtectedMaterialText}";
 
-            if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey))
+            // Create the request payload
+            var requestPayload = new
             {
-                throw new InvalidOperationException("ContentSafety endpoint and API key must be configured in appsettings.json");
-            }
+                TextToAnalyze
+            };
 
-            // Perform the protected material detection for text
-            var result = await CallProtectedMaterialTextApiAsync(endpoint, apiKey, textToAnalyze);
+            var result = await SendApiRequest(apiUrl, apiKey, requestPayload, "Protected Material Detection (Text)");
 
             // Display results
             DisplayAnalysisResultHelper.DisplayProtectedMaterialResults(result, "text");
@@ -59,26 +68,34 @@ public static class ProtectedMaterialDetection
     /// </summary>
     /// <param name="configuration">Configuration containing endpoint and API key</param>
     /// <param name="codeToAnalyze">The code content to analyze for protected material</param>
-    public static async Task AnalyzeProtectedCodeAsync(IConfiguration configuration, string codeToAnalyze)
+    public static async Task AnalyzeProtectedCodeAsync(IConfiguration configuration)
     {
+        // Get endpoint and API key from configuration
+        var endpoint = configuration["ContentSafety:Endpoint"];
+        var apiKey = configuration["ContentSafety:ApiKey"];
+
+        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException("ContentSafety endpoint and API key must be configured in appsettings.json");
+        }
+
         try
         {
             Console.WriteLine("=== PROTECTED CODE MATERIAL DETECTION MODE ===");
             Console.WriteLine($"Analyzing code for protected/copyrighted content...");
-            Console.WriteLine($"Code to analyze: {codeToAnalyze[..Math.Min(150, codeToAnalyze.Length)]}...");
             Console.WriteLine(new string('-', 50));
 
-            // Get endpoint and API key from configuration
-            var endpoint = configuration["ContentSafety:Endpoint"];
-            var apiKey = configuration["ContentSafety:ApiKey"];
+            // Construct the API URL for code
+            var baseUrl = endpoint.TrimEnd('/');
+            var apiUrl = $"{baseUrl}{UrlForProtectedMaterialCode}";
 
-            if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(apiKey))
+            // Create the request payload
+            var requestPayload = new
             {
-                throw new InvalidOperationException("ContentSafety endpoint and API key must be configured in appsettings.json");
-            }
+                CodeToAnalyze
+            };
 
-            // Perform the protected material detection for code
-            var result = await CallProtectedMaterialCodeApiAsync(endpoint, apiKey, codeToAnalyze);
+            var result = await SendApiRequest(apiUrl, apiKey, requestPayload, "Protected Material Detection (Code)");
 
             // Display results
             DisplayAnalysisResultHelper.DisplayProtectedMaterialResults(result, "code");
@@ -89,76 +106,6 @@ public static class ProtectedMaterialDetection
         {
             Console.WriteLine($"An error occurred during protected code material detection: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Legacy method for backward compatibility - analyzes text content for protected material.
-    /// </summary>
-    /// <param name="configuration">Configuration containing endpoint and API key</param>
-    /// <param name="textToAnalyze">The text content to analyze for protected material</param>
-    public static async Task AnalyzeProtectedMaterialAsync(IConfiguration configuration, string textToAnalyze)
-    {
-        await AnalyzeProtectedTextAsync(configuration, textToAnalyze);
-    }
-
-    /// <summary>
-    /// Calls the Azure Content Safety Protected Material Detection API to analyze text for copyrighted content.
-    /// </summary>
-    /// <param name="endpoint">The Azure Content Safety endpoint</param>
-    /// <param name="apiKey">The API subscription key</param>
-    /// <param name="text">The text content to analyze</param>
-    /// <returns>The API response as a JsonDocument</returns>
-    private static async Task<JsonDocument> CallProtectedMaterialTextApiAsync(string endpoint, string apiKey, string text)
-    {
-        try
-        {
-            // Construct the API URL for text
-            var baseUrl = endpoint.TrimEnd('/');
-            var apiUrl = $"{baseUrl}{UrlForProtectedMaterialText}";
-
-            // Create the request payload
-            var requestPayload = new
-            {
-                text
-            };
-
-            return await SendApiRequest(apiUrl, apiKey, requestPayload, "Protected Material Detection (Text)");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Text API request failed: {ex.Message}");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Calls the Azure Content Safety Protected Material Detection API to analyze code for copyrighted content.
-    /// </summary>
-    /// <param name="endpoint">The Azure Content Safety endpoint</param>
-    /// <param name="apiKey">The API subscription key</param>
-    /// <param name="code">The code content to analyze</param>
-    /// <returns>The API response as a JsonDocument</returns>
-    private static async Task<JsonDocument> CallProtectedMaterialCodeApiAsync(string endpoint, string apiKey, string code)
-    {
-        try
-        {
-            // Construct the API URL for code
-            var baseUrl = endpoint.TrimEnd('/');
-            var apiUrl = $"{baseUrl}{UrlForProtectedMaterialCode}";
-
-            // Create the request payload
-            var requestPayload = new
-            {
-                code
-            };
-
-            return await SendApiRequest(apiUrl, apiKey, requestPayload, "Protected Material Detection (Code)");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Code API request failed: {ex.Message}");
             throw;
         }
     }
