@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentSafetySamples", "AzureAIContentSafety\ContentSafetySamples.csproj", "{3E0358E2-23A3-70A0-0413-F710D5DBE066}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContentSafetySamples", "AzureAIContentSafety\ContentSafetySamples.csproj", "{3E0358E2-23A3-70A0-0413-F710D5DBE066}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextToSpeech", "TextToSpeech", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToSpeech", "AzureAISpeech\TextToSpeech\TextToSpeech.csproj", "{66F40128-C4B5-4CBF-8F76-54FCFC9141E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToSpeech", "AzureAISpeech\TextToSpeech\TextToSpeech.csproj", "{66F40128-C4B5-4CBF-8F76-54FCFC9141E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextTranslation", "TextTranslation", "{93EBDD60-B50C-4603-9AC9-1EA8C673D90D}"
 EndProject
@@ -41,6 +41,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakerVerificationWAV", "AzureAISpeech\SpeakerVerification\SpeakerVerificationWAV\SpeakerVerificationWAV.csproj", "{598CADD5-F632-4E81-89DC-01DC4F61665F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeakerVerificationEnrollment", "AzureAISpeech\SpeakerVerificationEnrollment\SpeakerVerificationEnrollment.csproj", "{E9ABBB94-922B-458B-931A-DE559FBD34D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIVision", "AzureAIVision\AIVision\AIVision.csproj", "{80917E3D-FBEA-4874-A9BB-71F50BCAEDB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
